@@ -399,6 +399,7 @@ void Shell::neovimError(NeovimConnector::NeovimError err)
 void Shell::neovimExited(int status)
 {
 	setAttached(false);
+	qDebug("Shell:      neovimExited");
 }
 
 /// Neovim requested a resize
@@ -1058,6 +1059,7 @@ void Shell::handleWindowFrameless(const QVariant& value) noexcept {
 
 void Shell::handleCloseEvent(const QVariantList& args) noexcept
 {
+  qDebug("Shell:      handleCloseEvent");
 	if (args.size() >= 2 && !args.at(1).canConvert<int>()) {
 		qWarning() << "Unexpected exit status for close:" << args.at(1);
 		return;
@@ -1702,12 +1704,14 @@ void Shell::updateGuiWindowState(Qt::WindowStates state)
 
 void Shell::closeEvent(QCloseEvent *ev)
 {
+  qDebug("Shell:      closeEvent start");
 	if (m_attached &&
 		m_nvim->connectionType() == NeovimConnector::SpawnedConnection) {
 		// If attached to a spawned Neovim process, ignore the event
 		// and try to close Neovim as :qa
 		bailoutIfinputBlocking();
 
+		qDebug("Shell:      closeEvent closing NVIM");
 		// Try to wait for neovim to quit
 		QEventLoop loop;
 		connect(m_nvim, &NeovimConnector::processExited, &loop, &QEventLoop::quit);
@@ -1723,7 +1727,10 @@ void Shell::closeEvent(QCloseEvent *ev)
 		});
 		loop.exec();
 	}
-	if (ev->isAccepted())  QWidget::closeEvent(ev);
+	if (ev->isAccepted())  {
+		qDebug("Shell:      closeEvent close");
+		QWidget::closeEvent(ev);
+	} else  qDebug("Shell:      closeEvent ignore");
 }
 
 void Shell::focusInEvent(QFocusEvent *ev)
