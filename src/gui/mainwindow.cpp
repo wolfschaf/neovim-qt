@@ -155,6 +155,7 @@ void MainWindow::neovimExited(int status)
 		m_errorWidget->showReconnect(m_nvim->canReconnect());
 		m_stack.setCurrentIndex(0);
 	} else {
+    qDebug("MainWindow: neovimExited close");
 		close();
 	}
 }
@@ -254,6 +255,7 @@ void MainWindow::neovimFullScreen(bool set)
 
 void MainWindow::neovimGuiCloseRequest(int status)
 {
+  qDebug("MainWindow: neovimGuiCloseRequest");
 	m_neovim_requested_close = true;
 	m_exitStatus = status;
 
@@ -282,6 +284,7 @@ void MainWindow::reconnectNeovim()
 
 void MainWindow::closeEvent(QCloseEvent *ev)
 {
+  qDebug("MainWindow: closeEvent start");
 	// Do not save window geometry in '--fullscreen' mode. If saved, all
 	// subsequent Neovim-Qt sessions would default to fullscreen mode.
 	if (!isFullScreen()) {
@@ -289,14 +292,17 @@ void MainWindow::closeEvent(QCloseEvent *ev)
 	}
 
 	if (m_neovim_requested_close) {
+  qDebug("MainWindow: closeEvent requested close");
 		// If this was requested by nvim, shutdown
 		emit closing(m_exitStatus);
 		ev->accept();
 	} else if (m_shell->close()) {
+  qDebug("MainWindow: closeEvent shell close");
 		// otherwise only if the Neovim shell closes too
 		emit closing(m_exitStatus);
 		ev->accept();
 	} else {
+  qDebug("MainWindow: closeEvent ignore");
 		ev->ignore();
 	}
 }

@@ -12,6 +12,7 @@
 #include <QScreen>
 #include <QSettings>
 #include <QShowEvent>
+#include <qglobal.h>
 
 #include "app.h"
 #include "compat_gui.h"
@@ -400,6 +401,7 @@ void Shell::neovimExited(int status)
 {
 	setAttached(false);
 	if (status == 0 && m_nvim->errorCause() == NeovimConnector::NoError) {
+    qDebug("Shell:      neovimExited close");
 		close();
 	}
 }
@@ -1061,6 +1063,7 @@ void Shell::handleWindowFrameless(const QVariant& value) noexcept {
 
 void Shell::handleCloseEvent(const QVariantList& args) noexcept
 {
+  qDebug("Shell:      handleCloseEvent");
 	if (args.size() >= 2 && !args.at(1).canConvert<int>()) {
 		qWarning() << "Unexpected exit status for close:" << args.at(1);
 		return;
@@ -1707,12 +1710,14 @@ void Shell::closeEvent(QCloseEvent *ev)
 {
 	if (m_attached &&
 		m_nvim->connectionType() == NeovimConnector::SpawnedConnection) {
+    qDebug("Shell:      closeEvent ignore");
 		// If attached to a spawned Neovim process, ignore the event
 		// and try to close Neovim as :qa
 		ev->ignore();
 		bailoutIfinputBlocking();
 		m_nvim->api0()->vim_command("confirm qa");
 	} else {
+    qDebug("Shell:      closeEvent close");
 		QWidget::closeEvent(ev);
 	}
 }
